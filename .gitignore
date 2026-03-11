@@ -1,0 +1,8 @@
+# compiled binaries
+*.exe
+
+# generated chunk files
+chunk_*.txt
+
+# reconstructed output
+reconstructedFile.txt
