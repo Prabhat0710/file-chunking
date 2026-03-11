@@ -1,12 +1,19 @@
-input: number_of_chunks
+open output file (reconstructed.txt)
 
-open output file "reconstructed.txt"
+chunk_number = 1
 
-for each chunk from 1 to number_of_chunks
-    open chunk_i.txt
-    read bytes
-    append bytes to reconstructed.txt
-    close chunk_i.txt
+loop
+    build chunk file name
+    try opening chunk file
+
+    if file does not exist
+        break loop
+
+    read chunk contents
+    append to reconstructed file
+
+    close chunk file
+    chunk_number++
 end loop
 
-close reconstructed.txt
+close reconstructed file
