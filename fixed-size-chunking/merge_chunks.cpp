@@ -3,6 +3,7 @@
 #include <vector>
 using namespace std;
 
+//make merging as a separate functionality in the program and in the program loop ask user if they want to merge any chunks
 int main(){
     string outFileName = "reconstructedFile.txt";
     int chunkNumber = 1;
@@ -33,6 +34,6 @@ int main(){
 
     outputFile.close();
     cout << "File successfully Reconstructed." <<  endl;
-    
+
     return 0;
 }
