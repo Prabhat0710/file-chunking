@@ -1,45 +1,65 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <filesytem>
+
+namespace fs = std::filesystem
 using namespace std;
 
-//an infiinte loop for the program 
-//give user 2 option chunking or merging
-//if chunking, provide file path, file shoujld be there
-//if merging, then ask for file name and if a folder with file name is found inside the  chunks_folder then start assembling the file
-int main(){
-    string inputFile = "input.txt";//make this path dynamic
-    // string inputFile = "../files/input.txt";//make this path dynamic
+void chunkFile(){
+    string inputFile;
+    cout << "Enter file name : ";
+    cin >> inputFile;
 
-    int chunkSize = 4;//take chunks size from user
+    int chunkSize;
+    cout << "Enter chunkSize (bytes) : ";
+    cin >> chunkSize;
 
-    //opens the user specfied file and puts it in the file variable
     ifstream file(inputFile, ios::binary);
 
-
     if(!file){
-        cout << "Error opening file" << endl;
-        return 1;
+        cout << "Error opening file\n";
+        return;
     }
+
+    string baseName = inputFile;
+
+    size_t dot = baseName.find_last_of('.');
+    if(dot != string::npos){
+        baseName = baseName.substr(0, dot);
+    }
+
+    fs::create_directories("chunk_folder/"+ baseName);
+
+    string metaPath = "chunks_folder/" + baseName + "/" + baseNamee + ".neta";
+    ofstream metafile(metaPath);
+
+    metaFile << "original_file " << inputFile << endl;
+    metaFile << "chunk_size " << chunkSize << endl;
 
     int chunkNumber = 1;
-    vector<char> buffer(chunkSize); 
-    // We used vector instead of arrays because arrays are dynamic
-    // vector<char> will tell computer to store 1 byte of data in vector
-    // buffer(chunkSize) creates a beffer container of 4 cells each of 1 byte in memory 
-    
-    while(file.read(buffer.data(), chunkSize) || file.gcount() > 0){ 
-        // file.read(buffer.data(), chunkSize) this tells to read 4 bytes from the file and store it in buffer
-        // buffer.data() will give the first address of beffer cell
-        // file.gcount() if last chunk contains less than chunkSize of bytes it will handle that
-        string outFile = "chunk_" + to_string(chunkNumber) + ".txt";//this nameing will be dyanamic and tthe prefix will be the name of the file openeed
-        ofstream chunkFile(outFile, ios::binary);//the chunk extension should be dynamic
+    vector<char> buffer(chunkSize);
+
+    while(file.read(buffer.data(), chunkSize) || file.gcount() > 0){
+        string chunkName = baseName + "_" + to_string(chunkNumber) + ".chunk";
+        string chunkPath = "chunks_folder/" + baseName + "/" + chunkNumber;
+
+        of stream chunkFile(chunkPath , ios::binary);
         chunkFile.write(buffer.data(), file.gcount());
         chunkFile.close();
-        chunkNumber++;
+
+        metaFile << chunkName << endl;
+
+        chunkNumber++
     }
-    //whenever a new file is chunked createcx a new folder inside the chunks folder and dynamically add a folder inside that foler with files's name and all chunks of thatt file should be placed inside that folder
+
     file.close();
-    cout << "File chunks successfully created." << endl;
+    metaFile.close();
+
+    cout << "File chunked successfully\n";
+}
+
+int main(){
+    chunkFile();
     return 0;
 }
