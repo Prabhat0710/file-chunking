@@ -73,8 +73,83 @@ void chunkFile()
     cout << "File chunked successfully\n";
 }
 
-int main(){
+void mergeFile(){
+    string baseName;
 
-    chunkFile();
+    cout << "Enter base file name to merge : ";
+    cin >> baseName;
+
+    string metaPath = "../chunks_folder/" + baseName + "/" + baseName + ".meta";
+
+    ifstream metaFile(metaPath);
+
+    if(!metaFile){
+        cout << "Error: metadata file not found\n";
+        return;
+    }
+
+    string label;
+    string originalFiles;
+    int chunkSize;
+
+    metaFile >> label >> originalFiles;
+    metaFile >> label >> chunkSize;
+
+    fs::create_directories("../merged_folder");
+    string outputPath = "../merged_folder/" + originalFiles;
+    ofstream outputFile(outputPath, ios::binary);
+    string chunkName;
+
+    while(metaFile >> chunkName){
+        string chunkPath = "../chunks_folder/" + baseName + "/" + chunkName;
+
+        ifstream chunkFile(chunkPath, ios::binary);
+
+        if (!chunkFile)
+        {
+            cout << "Error opening chunk: " << chunkName << endl;
+            return;
+        }
+
+        vector<char> buffer(chunkSize);
+
+        while (chunkFile.read(buffer.data(), chunkSize) || chunkFile.gcount() > 0)
+        {
+            outputFile.write(buffer.data(), chunkFile.gcount());
+        }
+
+        chunkFile.close();
+    }
+
+    outputFile.close();
+    metaFile.close();
+
+    cout << "File reconstructed successfully\n";
+}
+
+int main(){
+    int choice;
+    while(true){
+        cout << "\n----- File Chunking System -----\n";
+        cout << "1. Chunk File\n";
+        cout << "2. Merge File\n";
+        cout << "3. Exit\n";
+        cout << "Enter choice: ";
+        cin >> choice;
+
+        if (choice == 1){
+            chunkFile();
+        }
+        else if (choice == 2){
+            mergeFile();
+        }
+        else if (choice == 3){
+            break;
+        }
+        else{
+            cout << "Invalid choice\n";
+        }
+    }
+
     return 0;
 }
