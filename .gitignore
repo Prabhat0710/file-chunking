@@ -1,8 +1,16 @@
-# compiled binaries
+# Ignore generated chunk files
+chunks_folder/
+merged_folder/
+files/
+
+# Ignore chunk artifacts
+*.chunk
+*.meta
+
+# Ignore compiled binaries
 *.exe
+*.out
+*.o
 
-# generated chunk files
-chunk_*.txt
-
-# reconstructed output
-reconstructedFile.txt
+# Ignore VSCode temporary files
+.vscode/
