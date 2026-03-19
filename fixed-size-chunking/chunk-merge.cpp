@@ -2,43 +2,61 @@
 #include <fstream>
 #include <vector>
 #include <filesystem>
+#include <limits>
 
 namespace fs = std::filesystem;
 using namespace std;
 
 void chunkFile()
 {
-    string fileName;
-    cout << "Enter file name (inside files folder): ";
-    cin >> fileName;
+    string filePath;
+    cout << "Enter full file path: ";
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    getline(cin, filePath);
+
+    // Check if file exists
+    if (!fs::exists(filePath))
+    {
+        cout << "Error: File not found\n";
+        return;
+    }
 
     int chunkSize;
     cout << "Enter chunk size (bytes): ";
     cin >> chunkSize;
 
-    // build full input path automatically
-    string inputPath = "../files/" + fileName;
+    // Extract file name from path
+    string fileName = fs::path(filePath).filename().string();
 
-    ifstream file(inputPath, ios::binary);
-
-    if (!file)
-    {
-        cout << "Error: file not found in files folder\n";
-        return;
-    }
-
-    // remove extension
+    // Remove extension to create base name
     string baseName = fileName;
     size_t dot = baseName.find_last_of('.');
-
     if (dot != string::npos)
         baseName = baseName.substr(0, dot);
 
-    // create chunk directory
-    string chunkDir = "../chunks_folder/" + baseName;
+    // Create local folders if they do not exist
+    fs::create_directories("files");
+    fs::create_directories("chunks_folder");
+
+    // Copy original file into files/ directory
+    string localCopy = "files/" + fileName;
+    fs::copy_file(filePath, localCopy, fs::copy_options::overwrite_existing);
+
+    cout << "Checking file: " << filePath << endl;
+    // Open copied file for reading
+    ifstream file(localCopy, ios::binary);
+
+    if (!file)
+    {
+        cout << "Error opening copied file\n";
+        return;
+    }
+
+    // Create folder for chunks
+    string chunkDir = "chunks_folder/" + baseName;
     fs::create_directories(chunkDir);
 
-    // create metadata file
+    // Create metadata file
     string metaPath = chunkDir + "/" + baseName + ".meta";
     ofstream metaFile(metaPath);
 
@@ -47,21 +65,20 @@ void chunkFile()
 
     int chunkNumber = 1;
 
+    // Buffer used to temporarily hold chunk data
     vector<char> buffer(chunkSize);
 
     while (file.read(buffer.data(), chunkSize) || file.gcount() > 0)
     {
         string chunkName = baseName + "_" + to_string(chunkNumber) + ".chunk";
-
         string chunkPath = chunkDir + "/" + chunkName;
 
         ofstream chunkFile(chunkPath, ios::binary);
 
         chunkFile.write(buffer.data(), file.gcount());
-
         chunkFile.close();
 
-        // record chunk in metadata
+        // Record chunk name inside metadata
         metaFile << chunkName << endl;
 
         chunkNumber++;
@@ -73,35 +90,43 @@ void chunkFile()
     cout << "File chunked successfully\n";
 }
 
-void mergeFile(){
+void mergeFile()
+{
     string baseName;
 
-    cout << "Enter base file name to merge : ";
+    cout << "Enter base file name to merge: ";
     cin >> baseName;
 
-    string metaPath = "../chunks_folder/" + baseName + "/" + baseName + ".meta";
-
+    string metaPath = "chunks_folder/" + baseName + "/" + baseName + ".meta";
+    cout << "Looking for metadata at: " << metaPath << endl;
     ifstream metaFile(metaPath);
 
-    if(!metaFile){
-        cout << "Error: metadata file not found\n";
+    if (!metaFile)
+    {
+        cout << "Metadata file not found\n";
         return;
     }
 
     string label;
-    string originalFiles;
+    string originalFile;
     int chunkSize;
 
-    metaFile >> label >> originalFiles;
+    // Read metadata header
+    metaFile >> label >> originalFile;
     metaFile >> label >> chunkSize;
 
-    fs::create_directories("../merged_folder");
-    string outputPath = "../merged_folder/" + originalFiles;
+    // Create folder for merged output
+    fs::create_directories("merged_folder");
+
+    string outputPath = "merged_folder/" + originalFile;
+
     ofstream outputFile(outputPath, ios::binary);
+ 
     string chunkName;
 
-    while(metaFile >> chunkName){
-        string chunkPath = "../chunks_folder/" + baseName + "/" + chunkName;
+    while (metaFile >> chunkName)
+    {
+        string chunkPath = "chunks_folder/" + baseName + "/" + chunkName;
 
         ifstream chunkFile(chunkPath, ios::binary);
 
@@ -124,29 +149,38 @@ void mergeFile(){
     outputFile.close();
     metaFile.close();
 
-    cout << "File reconstructed successfully\n";
+    cout << "File merged successfully\n";
 }
 
-int main(){
+int main()
+{
     int choice;
-    while(true){
+
+    while (true)
+    {
         cout << "\n----- File Chunking System -----\n";
         cout << "1. Chunk File\n";
         cout << "2. Merge File\n";
         cout << "3. Exit\n";
         cout << "Enter choice: ";
+
         cin >> choice;
 
-        if (choice == 1){
+        if (choice == 1)
+        {
             chunkFile();
         }
-        else if (choice == 2){
+        else if (choice == 2)
+        {
             mergeFile();
         }
-        else if (choice == 3){
+        else if (choice == 3)
+        {
+            cout << "Exiting program\n";
             break;
         }
-        else{
+        else
+        {
             cout << "Invalid choice\n";
         }
     }
