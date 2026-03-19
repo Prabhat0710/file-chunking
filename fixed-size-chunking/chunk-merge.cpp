@@ -124,32 +124,27 @@ void mergeFile()
  
     string chunkName;
 
-    while (metaFile >> chunkName)
-    {
+    while(metaFile >> chunkName){
         string chunkPath = "chunks_folder/" + baseName + "/" + chunkName;
 
-        ifstream chunkFile(chunkPath, ios::binary);
-
-        if (!chunkFile)
+        if(!fs::exists(chunkPath))
         {
-            cout << "Error opening chunk: " << chunkName << endl;
+            cout << "Error: Missing chunk " << chunkName << endl;
+            cout << "Merge aborted\n";
             return;
         }
 
+        ifstream chunkFile(chunkPath, ios::binary);
+
         vector<char> buffer(chunkSize);
 
-        while (chunkFile.read(buffer.data(), chunkSize) || chunkFile.gcount() > 0)
+        while(chunkFile.read(buffer.data(), chunkSize) || chunkFile.gcount() > 0)
         {
             outputFile.write(buffer.data(), chunkFile.gcount());
         }
 
         chunkFile.close();
     }
-
-    outputFile.close();
-    metaFile.close();
-
-    cout << "File merged successfully\n";
 }
 
 int main()
