@@ -2,13 +2,13 @@
 #include <fstream>
 #include <vector>
 #include <filesystem>
-#include <limits>
+
+#include "chunker.h"
 
 namespace fs = std::filesystem;
 using namespace std;
 
-void chunkFile()
-{
+void chunkFile(){
     string filePath;
     cout << "Enter full file path: ";
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
@@ -88,97 +88,4 @@ void chunkFile()
     metaFile.close();
 
     cout << "File chunked successfully\n";
-}
-
-void mergeFile()
-{
-    string baseName;
-
-    cout << "Enter base file name to merge: ";
-    cin >> baseName;
-
-    string metaPath = "chunks_folder/" + baseName + "/" + baseName + ".meta";
-    cout << "Looking for metadata at: " << metaPath << endl;
-    ifstream metaFile(metaPath);
-
-    if (!metaFile)
-    {
-        cout << "Metadata file not found\n";
-        return;
-    }
-
-    string label;
-    string originalFile;
-    int chunkSize;
-
-    // Read metadata header
-    metaFile >> label >> originalFile;
-    metaFile >> label >> chunkSize;
-
-    // Create folder for merged output
-    fs::create_directories("merged_folder");
-
-    string outputPath = "merged_folder/" + originalFile;
-
-    ofstream outputFile(outputPath, ios::binary);
- 
-    string chunkName;
-
-    while(metaFile >> chunkName){
-        string chunkPath = "chunks_folder/" + baseName + "/" + chunkName;
-
-        if(!fs::exists(chunkPath))
-        {
-            cout << "Error: Missing chunk " << chunkName << endl;
-            cout << "Merge aborted\n";
-            return;
-        }
-
-        ifstream chunkFile(chunkPath, ios::binary);
-
-        vector<char> buffer(chunkSize);
-
-        while(chunkFile.read(buffer.data(), chunkSize) || chunkFile.gcount() > 0)
-        {
-            outputFile.write(buffer.data(), chunkFile.gcount());
-        }
-
-        chunkFile.close();
-    }
-}
-
-int main()
-{
-    int choice;
-
-    while (true)
-    {
-        cout << "\n----- File Chunking System -----\n";
-        cout << "1. Chunk File\n";
-        cout << "2. Merge File\n";
-        cout << "3. Exit\n";
-        cout << "Enter choice: ";
-
-        cin >> choice;
-
-        if (choice == 1)
-        {
-            chunkFile();
-        }
-        else if (choice == 2)
-        {
-            mergeFile();
-        }
-        else if (choice == 3)
-        {
-            cout << "Exiting program\n";
-            break;
-        }
-        else
-        {
-            cout << "Invalid choice\n";
-        }
-    }
-
-    return 0;
 }
