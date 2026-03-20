@@ -1,14 +1,17 @@
 #include <iostream>
 
-#include "../include/chunker.h"
-#include "../include/merger.h"
+#include "chunker.h"
+#include "merger.h"
+
+#include <filesystem>
+namespace fs = std::filesystem;
 
 using namespace std;
 
-int main()
-{
-    int choice;
+int main(){
 
+    cout << "Current working directory: " << fs::current_path() << endl;
+    int choice;
     while (true)
     {
         cout << "\n----- File Chunking System -----\n";
