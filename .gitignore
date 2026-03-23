@@ -1,7 +1,7 @@
 # Ignore generated chunk files
 chunks_folder/
 merged_folder/
-files/
+data/
 
 # Ignore chunk artifacts
 *.chunk

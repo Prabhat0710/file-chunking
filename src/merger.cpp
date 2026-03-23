@@ -8,42 +8,56 @@
 namespace fs = std::filesystem;
 using namespace std;
 
-void mergeFile(){
+void mergeFile()
+{
     string baseName;
-    cout << "Enter base file name to merge: ";
+
+    cout << "Enter base file name (without extension): ";
     cin >> baseName;
 
-    string metaPath = "chunks_folder/" + baseName + "/" + baseName + ".meta";
-    cout << "Looking for metadata at: " << metaPath << endl;
-    ifstream metaFile(metaPath);
+    // Define directories
+    fs::path baseDir = "data";
+    fs::path chunksDir = baseDir / "chunks";
+    fs::path mergedDir = baseDir / "merged";
 
-    if (!metaFile)
+    // Create merged folder if not exists
+    fs::create_directories(mergedDir);
+
+    // Path to chunk folder of this file
+    fs::path fileChunkDir = chunksDir / baseName;
+
+    // Metadata file path
+    fs::path metaPath = fileChunkDir / (baseName + ".meta");
+
+    if (!fs::exists(metaPath))
     {
-        cout << "Metadata file not found\n";
+        cout << "Error: Metadata file not found\n";
         return;
     }
 
-    string label;
-    string originalFile;
+    ifstream metaFile(metaPath);
+
+    string label, originalFile;
     int chunkSize;
 
     // Read metadata header
     metaFile >> label >> originalFile;
     metaFile >> label >> chunkSize;
 
-    // Create folder for merged output
-    fs::create_directories("merged_folder");
-
-    string outputPath = "merged_folder/" + originalFile;
+    // Output file path
+    fs::path outputPath = mergedDir / (baseName + "_merged.txt");
 
     ofstream outputFile(outputPath, ios::binary);
- 
+
     string chunkName;
 
-    while(metaFile >> chunkName){
-        string chunkPath = "chunks_folder/" + baseName + "/" + chunkName;
+    // Read chunk names from metadata
+    while (metaFile >> chunkName)
+    {
+        fs::path chunkPath = fileChunkDir / chunkName;
 
-        if(!fs::exists(chunkPath))
+        // Check if chunk exists
+        if (!fs::exists(chunkPath))
         {
             cout << "Error: Missing chunk " << chunkName << endl;
             cout << "Merge aborted\n";
@@ -54,7 +68,8 @@ void mergeFile(){
 
         vector<char> buffer(chunkSize);
 
-        while(chunkFile.read(buffer.data(), chunkSize) || chunkFile.gcount() > 0)
+        // Read chunk and write to output
+        while (chunkFile.read(buffer.data(), chunkSize) || chunkFile.gcount() > 0)
         {
             outputFile.write(buffer.data(), chunkFile.gcount());
         }
@@ -62,5 +77,8 @@ void mergeFile(){
         chunkFile.close();
     }
 
-    cout << "File merged successfully";
+    outputFile.close();
+    metaFile.close();
+
+    cout << "File merged successfully\n";
 }
