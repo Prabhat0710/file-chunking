@@ -15,18 +15,13 @@ void mergeFile()
     cout << "Enter base file name (without extension): ";
     cin >> baseName;
 
-    // Define directories
     fs::path baseDir = "data";
     fs::path chunksDir = baseDir / "chunks";
     fs::path mergedDir = baseDir / "merged";
 
-    // Create merged folder if not exists
     fs::create_directories(mergedDir);
 
-    // Path to chunk folder of this file
     fs::path fileChunkDir = chunksDir / baseName;
-
-    // Metadata file path
     fs::path metaPath = fileChunkDir / (baseName + ".meta");
 
     if (!fs::exists(metaPath))
@@ -37,38 +32,58 @@ void mergeFile()
 
     ifstream metaFile(metaPath);
 
-    string label, originalFile;
-    int chunkSize;
+    string line;
+    string fileName;
+    int chunkSize = 0;
+    int totalChunks = 0;
 
     // Read metadata header
-    metaFile >> label >> originalFile;
-    metaFile >> label >> chunkSize;
+    getline(metaFile, line); // file_name=...
+    fileName = line.substr(line.find("=") + 1);
 
-    // Output file path
-    fs::path outputPath = mergedDir / (baseName + "_merged.txt");
+    getline(metaFile, line); // file_size=...
 
-    ofstream outputFile(outputPath, ios::binary);
+    getline(metaFile, line); // chunk_size=...
+    chunkSize = stoi(line.substr(line.find("=") + 1));
 
+    getline(metaFile, line); // total_chunks=...
+    totalChunks = stoi(line.substr(line.find("=") + 1));
+
+    getline(metaFile, line); // "chunks:"
+
+    vector<string> chunkNames;
     string chunkName;
 
-    // Read chunk names from metadata
-    while (metaFile >> chunkName)
+    while (getline(metaFile, chunkName))
     {
-        fs::path chunkPath = fileChunkDir / chunkName;
+        if (!chunkName.empty())
+            chunkNames.push_back(chunkName);
+    }
 
-        // Check if chunk exists
+    // ✅ Validate chunk count
+    if (chunkNames.size() != totalChunks)
+    {
+        cout << "Error: Metadata mismatch (missing chunks)\n";
+        return;
+    }
+
+    fs::path outputPath = mergedDir / (baseName + "_merged.txt");
+    ofstream outputFile(outputPath, ios::binary);
+
+    for (const auto& name : chunkNames)
+    {
+        fs::path chunkPath = fileChunkDir / name;
+
         if (!fs::exists(chunkPath))
         {
-            cout << "Error: Missing chunk " << chunkName << endl;
+            cout << "Error: Missing chunk " << name << endl;
             cout << "Merge aborted\n";
             return;
         }
 
         ifstream chunkFile(chunkPath, ios::binary);
-
         vector<char> buffer(chunkSize);
 
-        // Read chunk and write to output
         while (chunkFile.read(buffer.data(), chunkSize) || chunkFile.gcount() > 0)
         {
             outputFile.write(buffer.data(), chunkFile.gcount());
