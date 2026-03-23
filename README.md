@@ -17,25 +17,8 @@ A modular C++ application that splits large files into smaller chunks and reliab
 
 ## 📁 Project Structure
 
-file-chunking/
-│
-├── src/
-│ ├── main.cpp # Menu interface
-│ ├── chunker.cpp # Chunking logic
-│ └── merger.cpp # Merge logic
-│
-├── include/
-│ ├── chunker.h
-│ └── merger.h
-│
-├── data/
-│ ├── chunks/ # Generated chunks
-│ └── merged/ # Reconstructed files
-│
-├── README.md
-├── pseudocode.md
-├── explanation.md
-└── .gitignore
+<img width="692" height="506" alt="image" src="https://github.com/user-attachments/assets/00732d65-e256-4155-8e70-5ea96951b457" />
+
 
 
 ---
