@@ -1,34 +1,36 @@
 # File Chunking System (C++)
 
-A modular C++ project that splits large files into smaller chunks and reconstructs them reliably.
+A modular C++ application that splits large files into smaller chunks and reliably reconstructs them using structured metadata.
 
 ---
 
 ## 🚀 Features
+
 - Fixed-size file chunking
-- File reconstruction from chunks
-- Metadata-based validation
-- Automatic folder management
-- Cross-platform file handling using C++17 filesystem
-- Modular architecture (`src/` and `include/`)
+- Reliable file reconstruction
+- Structured metadata system
+- Missing chunk detection
+- Automatic directory management
+- Modular architecture (src/include)
 
 ---
 
 ## 📁 Project Structure
+
 file-chunking/
 │
 ├── src/
-│ ├── main.cpp # Menu-driven interface
+│ ├── main.cpp # Menu interface
 │ ├── chunker.cpp # Chunking logic
-│ └── merger.cpp # Reconstruction logic
+│ └── merger.cpp # Merge logic
 │
 ├── include/
 │ ├── chunker.h
 │ └── merger.h
 │
-├── files/ # Input files
-├── chunks_folder/ # Generated chunks
-├── merged_folder/ # Reconstructed files
+├── data/
+│ ├── chunks/ # Generated chunks
+│ └── merged/ # Reconstructed files
 │
 ├── README.md
 ├── pseudocode.md
@@ -41,21 +43,46 @@ file-chunking/
 ## ⚙️ How It Works
 
 ### 1. Chunking
+
 - User provides full file path
 - File is split into fixed-size chunks
-- Chunks are stored in:
-- A metadata file is created to track chunk order
+- Chunks are stored in: data/chunks/<filename>/
+- A metadata file is created describing:
+- file name
+- file size
+- chunk size
+- total chunks
+- chunk list
 
 ---
 
 ### 2. Merging
-- Program reads metadata file
-- Validates all chunks exist
-- Reconstructs original file in:
+
+- Reads metadata file
+- Validates:
+- total chunks
+- existence of all chunk files
+- Reconstructs original file into: data/merged/
 
 ---
 
-## 🛠️ Compilation
+## 🧠 Metadata Format
+
+- Example:
+- file_name=data.txt
+- file_size=1024
+- chunk_size=100
+- total_chunks=11
+ 
+- chunks:
+- data_1.chunk
+- data_2.chunk
+- data_3.chunk
+
+---
+
+## 🛠️ Build Instructions
+
 ```bash
 g++ -std=c++17 -Iinclude src/main.cpp src/chunker.cpp src/merger.cpp -o chunker
 
@@ -76,6 +103,13 @@ Enter base file name: file
 
 ---
 
+⚠️ Current Limitations
+Only fixed-size chunking implemented
+No checksum/hash validation yet
+Metadata integrity not verified
+
+---
+
 🧠 Learning Goals
 This project explores:
 File I/O in C++
@@ -84,6 +118,7 @@ Filesystem operations
 Modular software design
 Real-world system structuring
 
+---
 
-📌 Author
+👤 Author
 Prabhat
