@@ -1,0 +1,10 @@
+dikha "Enter a number : "
+puch num
+
+jabtak num < 5:
+    agar num == 3:
+        ruk
+    dikha num
+    num = num + 1
+
+dikha num

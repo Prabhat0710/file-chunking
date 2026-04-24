@@ -1,0 +1,8 @@
+puch x
+
+agar x > 10:
+    dikha ">10"
+agarnahi x == 10:
+    dikha "=10"
+warna:
+    dikha "<10"
